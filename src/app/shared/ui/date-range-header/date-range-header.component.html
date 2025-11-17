@@ -3,21 +3,33 @@
     <h1 class="text-3xl font-bold text-gray-900">{{ title }}</h1>
 
     <div class="flex items-center gap-2">
-      <button 
+      <button
         (click)="onExport()"
-        class="px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
-        📥 Export
+        class="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+      >
+        <mat-icon class="!w-5 !h-4">download</mat-icon>
+        Export
       </button>
-      
-      <label class="px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition-colors cursor-pointer">
-        📤 Import
-        <input type="file" accept=".json" (change)="onImport($event)" class="hidden">
+
+      <label
+        class="flex items-center gap-2 px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition-colors cursor-pointer"
+      >
+        <mat-icon class="!w-5 !h-4">upload</mat-icon>
+        Import
+        <input
+          type="file"
+          accept=".json"
+          (change)="onImport($event)"
+          class="hidden"
+        />
       </label>
-      
-      <button 
+
+      <button
         (click)="onClear()"
-        class="px-3 py-1.5 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors">
-        🗑️ Clear
+        class="flex items-center gap-2 px-3 py-1.5 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+      >
+        <mat-icon class="!w-6 !h-4">delete</mat-icon>
+        Clear
       </button>
     </div>
   </div>

@@ -1,11 +1,19 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  HostListener,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContextMenuData } from '../../models/budget.model';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon'
 
 @Component({
   selector: 'app-context-menu',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatButtonModule, MatIconModule],
   template: `
     <div
       *ngIf="data"
@@ -17,7 +25,7 @@ import { ContextMenuData } from '../../models/budget.model';
         (click)="onApplyToAll()"
         class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 transition-colors flex items-center gap-2"
       >
-        <span>📋</span>
+        <mat-icon class="!w-4 !h-4">content_copy</mat-icon>
         <span>Apply to all months</span>
       </button>
     </div>
@@ -28,8 +36,13 @@ export class ContextMenuComponent {
   @Output() applyToAll = new EventEmitter<void>();
   @Output() close = new EventEmitter<void>();
 
+  @HostListener('click', ['$event'])
+  onClick(event: MouseEvent): void {
+    event.stopPropagation();
+  }
+
   onApplyToAll(): void {
     this.applyToAll.emit();
-    this.close.emit();
+    // this.close.emit();
   }
 }

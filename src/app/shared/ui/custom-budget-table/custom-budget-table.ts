@@ -1,4 +1,10 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  HostListener,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BudgetCategory, MonthInfo } from '../../../models/date-range.model';
@@ -113,5 +119,28 @@ export class CustomBudgetTableComponent {
 
   trackByMonth(index: number, month: MonthInfo): string {
     return month.key;
+  }
+
+  onAddCategoryAfter(currentCategoryId: string, event: Event): void {
+    event.preventDefault();
+    const input = event.target as HTMLInputElement;
+    const categoryType = this.incomeCategories.find(
+      (c) => c.id === currentCategoryId
+    )
+      ? 'income'
+      : 'expense';
+
+    this.categoryAdd.emit(categoryType);
+
+    setTimeout(() => {
+      const inputs = document.querySelectorAll('input[type="text"]');
+      const lastInput = inputs[inputs.length - 1] as HTMLInputElement;
+      lastInput?.focus();
+    }, 100);
+  }
+
+  @HostListener('document:keydown.control.enter')
+  onGlobalAddShortcut(): void {
+    this.onAddCategory('income');
   }
 }

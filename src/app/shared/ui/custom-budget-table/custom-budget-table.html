@@ -53,7 +53,9 @@
             class="px-4 py-3 font-bold text-green-800 border-b border-gray-200 cursor-pointer sticky left-0 bg-green-50 z-10"
           >
             <div class="flex items-center gap-2">
-              <span>{{ expandedSections.income ? '▼' : '►' }}</span>
+              <mat-icon class="!w-5 !h-5">
+                {{ expandedSections.income ? 'expand_more' : 'chevron_right' }}
+              </mat-icon>
               <span>INCOME</span>
             </div>
           </td>
@@ -96,6 +98,7 @@
                 [value]="category.name"
                 [disabled]="!config.allowEdit"
                 (change)="onCategoryNameChange(category.id, $event)"
+                (keydown.enter)="onAddCategoryAfter(category.id, $event)"
                 class="w-full px-2 py-1 border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
               />
             </td>
@@ -140,8 +143,11 @@
             (click)="toggleSection('expenses')"
             class="px-4 py-3 font-bold text-red-800 border-b border-gray-200 cursor-pointer sticky left-0 bg-red-50 z-10"
           >
+
             <div class="flex items-center gap-2">
-              <span>{{ expandedSections.expenses ? '▼' : '►' }}</span>
+              <mat-icon class="!w-5 !h-5">
+                {{ expandedSections.expenses ? 'expand_more' : 'chevron_right' }}
+              </mat-icon>
               <span>EXPENSES</span>
             </div>
           </td>

@@ -198,8 +198,16 @@ export class BudgetStore {
     reader.onload = (e) => {
       try {
         const data = JSON.parse(e.target?.result as string);
-        this.state.set(data);
-        alert('✅ Import successful!');
+
+        if (this.validateImportedData(data)) {
+          this.state.set(data);
+          this.showAlert('✅ Import successful!', 'success');
+        } else {
+          this.showAlert(
+            '❌ Invalid file format: missing required fields',
+            'error'
+          );
+        }
       } catch (error) {
         alert('❌ Invalid file format');
       }
@@ -207,7 +215,21 @@ export class BudgetStore {
     reader.readAsText(file);
   }
 
-  // Helper methods
+  private validateImportedData(data: any): boolean {
+    return (
+      data &&
+      typeof data === 'object' &&
+      data.dateRange &&
+      Array.isArray(data.incomeCategories) &&
+      Array.isArray(data.expenseCategories) &&
+      typeof data.openingBalance === 'number'
+    );
+  }
+
+  private showAlert(message: string, type: 'success' | 'error'): void {
+    alert(message);
+  }
+
   private calculateMonthsInRange(range: DateRange): MonthInfo[] {
     const [startYear, startMonth] = range.startMonth.split('-').map(Number);
     const [endYear, endMonth] = range.endMonth.split('-').map(Number);

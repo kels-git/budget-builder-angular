@@ -25,9 +25,17 @@ export class BudgetTableComponent {
 
   contextMenuData: ContextMenuData | null = null;
 
-  @HostListener('document:click')
-  onDocumentClick(): void {
-    this.contextMenuData = null;
+  // @HostListener('document:click')
+  // onDocumentClick(): void {
+  //   this.contextMenuData = null;
+  // }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const contextMenu = document.querySelector('app-context-menu');
+    if (contextMenu && !contextMenu.contains(event.target as Node)) {
+      this.contextMenuData = null;
+    }
   }
 
   onStartMonthChange(startMonth: string): void {
