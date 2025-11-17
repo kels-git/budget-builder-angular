@@ -1,27 +1,43 @@
-# BudgetBuilder
+# Budget Builder - Angular
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.0.
+A comprehensive budget management application built with Angular 17, featuring monthly budget planning, income/expense tracking, and financial forecasting.
 
-## Development server
+![Angular](https://img.shields.io/badge/Angular-17.3.0-red)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC)
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## ✨ Features
 
-## Code scaffolding
+- **Monthly Budget Planning** - Plan your budget across multiple months
+- **Income & Expense Tracking** - Categorize and track all financial transactions
+- **Real-time Calculations** - Automatic totals, net income, and closing balances
+- **Bulk Operations** - Apply values across all months with context menu
+- **Date Range Selection** - Flexible monthly planning with custom date ranges
+- **Export/Import** - Save and load your budget data
+- **Responsive Design** - Works seamlessly on desktop and mobile
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## 🚀 Quick Start
 
-## Build
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+### Installation
 
-## Running unit tests
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/kels-git/budget-builder-angular.git
+   cd budget-builder-angular
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+2. **Install dependencies**
 
-## Running end-to-end tests
+   ```bash 
+   npm install
+   ```
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+3. **Start development server**
 
-## Further help
+   ```bash 
+   ng serve
+   ```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
