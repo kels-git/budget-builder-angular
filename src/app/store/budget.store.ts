@@ -327,4 +327,70 @@ export class BudgetStore {
       closingBalance,
     };
   }
+
+  addParentCategory(type: 'income' | 'expense', name: string): void {
+    this.state.update((state) => {
+      const newCategory: BudgetCategory = {
+        id: `parent-${Date.now()}`,
+        name: name,
+        type,
+        values: {},
+        isParent: true,
+      };
+
+      return type === 'income'
+        ? {
+            ...state,
+            incomeCategories: [...state.incomeCategories, newCategory],
+          }
+        : {
+            ...state,
+            expenseCategories: [...state.expenseCategories, newCategory],
+          };
+    });
+  }
+
+  addChildCategory(parentId: string, type: 'income' | 'expense'): void {
+    this.state.update((state) => {
+      const newCategory: BudgetCategory = {
+        id: Date.now().toString(),
+        name: type === 'income' ? 'New Income Item' : 'New Expense Item',
+        type,
+        values: {},
+        parentId: parentId,
+      };
+
+      return type === 'income'
+        ? {
+            ...state,
+            incomeCategories: [...state.incomeCategories, newCategory],
+          }
+        : {
+            ...state,
+            expenseCategories: [...state.expenseCategories, newCategory],
+          };
+    });
+  }
+
+  readonly groupedIncomeCategories = computed(() => {
+    return this.groupCategories(this.incomeCategories());
+  });
+
+  readonly groupedExpenseCategories = computed(() => {
+    return this.groupCategories(this.expenseCategories());
+  });
+
+  private groupCategories(categories: BudgetCategory[]): BudgetCategory[] {
+    const parents = categories.filter((c) => c.isParent);
+    const children = categories.filter((c) => c.parentId);
+    const orphans = categories.filter((c) => !c.isParent && !c.parentId);
+
+    return [
+      ...parents.map((parent) => ({
+        ...parent,
+        children: children.filter((child) => child.parentId === parent.id),
+      })),
+      ...orphans,
+    ];
+  }
 }

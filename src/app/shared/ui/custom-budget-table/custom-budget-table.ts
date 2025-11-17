@@ -43,7 +43,7 @@ export class CustomBudgetTableComponent {
     allowDelete: true,
     allowEdit: true,
   };
-
+  @Output() childCategoryAdd = new EventEmitter<string>();
   @Output() categoryValueChange = new EventEmitter<CategoryEvent>();
   @Output() categoryNameChange = new EventEmitter<CategoryEvent>();
   @Output() categoryDelete = new EventEmitter<string>();
@@ -142,5 +142,54 @@ export class CustomBudgetTableComponent {
   @HostListener('document:keydown.control.enter')
   onGlobalAddShortcut(): void {
     this.onAddCategory('income');
+  }
+
+  private expandedCategories = new Set<string>();
+
+  toggleCategoryExpand(categoryId: string): void {
+    if (this.expandedCategories.has(categoryId)) {
+      this.expandedCategories.delete(categoryId);
+    } else {
+      this.expandedCategories.add(categoryId);
+    }
+  }
+
+  isCategoryExpanded(categoryId: string): boolean {
+    return this.expandedCategories.has(categoryId);
+  }
+
+  getChildCategories(parentId: string): BudgetCategory[] {
+    return [...this.incomeCategories, ...this.expenseCategories].filter(
+      (c) => c.parentId === parentId
+    );
+  }
+
+  getParentCategoryTotal(parent: BudgetCategory, monthKey: string): number {
+    const children = this.getChildCategories(parent.id);
+    return children.reduce(
+      (sum, child) => sum + (child.values[monthKey] || 0),
+      0
+    );
+  }
+
+  getParentCategoryGrandTotal(parent: BudgetCategory): number {
+    const children = this.getChildCategories(parent.id);
+    return children.reduce(
+      (sum, child) => sum + this.getCategoryTotal(child),
+      0
+    );
+  }
+
+  onAddChildCategory(parentId: string): void {
+    this.childCategoryAdd.emit(parentId);
+  }
+
+  getOrganizedCategories(type: 'income' | 'expense'): BudgetCategory[] {
+    const categories =
+      type === 'income' ? this.incomeCategories : this.expenseCategories;
+    const parents = categories.filter((cat) => cat.isParent);
+    const orphans = categories.filter((cat) => !cat.isParent && !cat.parentId);
+
+    return [...parents, ...orphans];
   }
 }

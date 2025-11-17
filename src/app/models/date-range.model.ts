@@ -9,6 +9,9 @@ export interface BudgetCategory {
   type: 'income' | 'expense';
   values: { [monthKey: string]: number };
   isEditable?: boolean;
+  parentId?: string;
+  isParent?: boolean;
+  children?: BudgetCategory[];
 }
 
 export interface MonthInfo {

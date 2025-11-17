@@ -85,56 +85,179 @@
         </tr>
 
         <!-- Income Categories -->
+        <!-- Income Categories with Parent/Child Support -->
         <ng-container *ngIf="expandedSections.income">
-          <tr
-            *ngFor="let category of incomeCategories; trackBy: trackByCategory"
-            class="hover:bg-gray-50"
+          <ng-container
+            *ngFor="let category of getOrganizedCategories('income'); trackBy: trackByCategory"
           >
-            <td
-              class="px-4 py-2 border-b border-gray-200 sticky left-0 bg-white z-10"
-            >
-              <input
-                type="text"
-                [value]="category.name"
-                [disabled]="!config.allowEdit"
-                (change)="onCategoryNameChange(category.id, $event)"
-                (keydown.enter)="onAddCategoryAfter(category.id, $event)"
-                class="w-full px-2 py-1 border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
-              />
-            </td>
-            <td
-              *ngFor="let month of months; trackBy: trackByMonth"
-              class="px-4 py-2 border-b border-gray-200"
-            >
-              <input
-                type="number"
-                [value]="getCategoryValue(category, month.key)"
-                [disabled]="!config.allowEdit"
-                (input)="onCellValueChange(category.id, month.key, $event)"
-                (contextmenu)="onContextMenu($event, category.id, month.key)"
-                class="w-full px-2 py-1 text-right border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
-                placeholder="0"
-              />
-            </td>
-            <td
-              *ngIf="config.showTotalColumn"
-              class="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200"
-            >
-              ${{ formatCurrency(getCategoryTotal(category)) }}
-            </td>
-            <td class="px-4 py-2 border-b border-gray-200">
-              <button
-                *ngIf="config.allowDelete"
-                mat-mini-fab
-                color="warning"
-                (click)="onDeleteCategory(category.id)"
-                class="!scale-75 hover:!bg-red-400"
-                matTooltip="Delete Category"
+            <!-- Parent Category Row -->
+            <tr *ngIf="category.isParent" class="bg-green-100 font-semibold">
+              <td
+                class="px-4 py-2 border-b border-gray-200 sticky left-0 bg-green-100 z-10"
               >
-                <mat-icon class="!scale-90">delete</mat-icon>
-              </button>
-            </td>
-          </tr>
+                <div class="flex items-center gap-2">
+                  <mat-icon
+                    class="!w-4 !h-4 cursor-pointer"
+                    (click)="toggleCategoryExpand(category.id)"
+                  >
+                    {{ isCategoryExpanded(category.id) ? 'expand_more' :
+                    'chevron_right' }}
+                  </mat-icon>
+                  <input
+                    type="text"
+                    [value]="category.name"
+                    [disabled]="!config.allowEdit"
+                    (change)="onCategoryNameChange(category.id, $event)"
+                    class="w-full px-2 py-1 font-semibold bg-transparent border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
+                  />
+                </div>
+              </td>
+              <td
+                *ngFor="let month of months; trackBy: trackByMonth"
+                class="px-4 py-2 text-right font-semibold border-b border-gray-200"
+              >
+                ${{ formatCurrency(getParentCategoryTotal(category, month.key))
+                }}
+              </td>
+              <td
+                *ngIf="config.showTotalColumn"
+                class="px-4 py-2 text-right font-semibold border-b border-gray-200"
+              >
+                ${{ formatCurrency(getParentCategoryGrandTotal(category)) }}
+              </td>
+              <td class="px-4 py-2 border-b border-gray-200">
+                <button
+                  mat-mini-fab
+                  color="primary"
+                  (click)="onAddChildCategory(category.id)"
+                  class="!bg-green-500 hover:!bg-green-600 !scale-75"
+                  matTooltip="Add sub-category"
+                >
+                  <mat-icon class="!scale-90">add</mat-icon>
+                </button>
+                <button
+                  *ngIf="config.allowDelete"
+                  mat-mini-fab
+                  color="warn"
+                  (click)="onDeleteCategory(category.id)"
+                  class="!scale-75 ml-1 hover:!bg-red-600"
+                  matTooltip="Delete category group"
+                >
+                  <mat-icon class="!scale-90">delete</mat-icon>
+                </button>
+              </td>
+            </tr>
+
+            <!-- Child Categories (Indented) -->
+            <ng-container
+              *ngIf="category.isParent && isCategoryExpanded(category.id)"
+            >
+              <tr
+                *ngFor="let child of getChildCategories(category.id)"
+                class="hover:bg-gray-50"
+              >
+                <td
+                  class="px-4 py-2 border-b border-gray-200 sticky left-0 bg-white z-10 pl-12"
+                >
+                  <div class="flex items-center gap-2">
+                    <div class="w-4 h-4"></div>
+                    <!-- Spacer for alignment -->
+                    <input
+                      type="text"
+                      [value]="child.name"
+                      [disabled]="!config.allowEdit"
+                      (change)="onCategoryNameChange(child.id, $event)"
+                      (keydown.enter)="onAddCategoryAfter(child.id, $event)"
+                      class="w-full px-2 py-1 border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
+                    />
+                  </div>
+                </td>
+                <td
+                  *ngFor="let month of months; trackBy: trackByMonth"
+                  class="px-4 py-2 border-b border-gray-200"
+                >
+                  <input
+                    type="number"
+                    [value]="getCategoryValue(child, month.key)"
+                    [disabled]="!config.allowEdit"
+                    (input)="onCellValueChange(child.id, month.key, $event)"
+                    (contextmenu)="onContextMenu($event, child.id, month.key)"
+                    class="w-full px-2 py-1 text-right border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
+                    placeholder="0"
+                  />
+                </td>
+                <td
+                  *ngIf="config.showTotalColumn"
+                  class="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200"
+                >
+                  ${{ formatCurrency(getCategoryTotal(child)) }}
+                </td>
+                <td class="px-4 py-2 border-b border-gray-200">
+                  <button
+                    *ngIf="config.allowDelete"
+                    mat-mini-fab
+                    color="warn"
+                    (click)="onDeleteCategory(child.id)"
+                    class="!scale-75 hover:!bg-red-600"
+                    matTooltip="Delete sub-category"
+                  >
+                    <mat-icon class="!scale-90">delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            </ng-container>
+
+            <!-- Regular Category Row (No Parent) -->
+            <tr
+              *ngIf="!category.isParent && !category.parentId"
+              class="hover:bg-gray-50"
+            >
+              <td
+                class="px-4 py-2 border-b border-gray-200 sticky left-0 bg-white z-10"
+              >
+                <input
+                  type="text"
+                  [value]="category.name"
+                  [disabled]="!config.allowEdit"
+                  (change)="onCategoryNameChange(category.id, $event)"
+                  (keydown.enter)="onAddCategoryAfter(category.id, $event)"
+                  class="w-full px-2 py-1 border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
+                />
+              </td>
+              <td
+                *ngFor="let month of months; trackBy: trackByMonth"
+                class="px-4 py-2 border-b border-gray-200"
+              >
+                <input
+                  type="number"
+                  [value]="getCategoryValue(category, month.key)"
+                  [disabled]="!config.allowEdit"
+                  (input)="onCellValueChange(category.id, month.key, $event)"
+                  (contextmenu)="onContextMenu($event, category.id, month.key)"
+                  class="w-full px-2 py-1 text-right border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
+                  placeholder="0"
+                />
+              </td>
+              <td
+                *ngIf="config.showTotalColumn"
+                class="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200"
+              >
+                ${{ formatCurrency(getCategoryTotal(category)) }}
+              </td>
+              <td class="px-4 py-2 border-b border-gray-200">
+                <button
+                  *ngIf="config.allowDelete"
+                  mat-mini-fab
+                  color="warn"
+                  (click)="onDeleteCategory(category.id)"
+                  class="!scale-75 hover:!bg-red-600"
+                  matTooltip="Delete Category"
+                >
+                  <mat-icon class="!scale-90">delete</mat-icon>
+                </button>
+              </td>
+            </tr>
+          </ng-container>
         </ng-container>
 
         <!-- Expenses Section -->
@@ -143,10 +266,10 @@
             (click)="toggleSection('expenses')"
             class="px-4 py-3 font-bold text-red-800 border-b border-gray-200 cursor-pointer sticky left-0 bg-red-50 z-10"
           >
-
             <div class="flex items-center gap-2">
               <mat-icon class="!w-5 !h-5">
-                {{ expandedSections.expenses ? 'expand_more' : 'chevron_right' }}
+                {{ expandedSections.expenses ? 'expand_more' : 'chevron_right'
+                }}
               </mat-icon>
               <span>EXPENSES</span>
             </div>
@@ -177,55 +300,179 @@
         </tr>
 
         <!-- Expense Categories -->
+        <!-- Expenses Categories with Parent/Child Support -->
         <ng-container *ngIf="expandedSections.expenses">
-          <tr
-            *ngFor="let category of expenseCategories; trackBy: trackByCategory"
-            class="hover:bg-gray-50"
+          <ng-container
+            *ngFor="let category of getOrganizedCategories('expense'); trackBy: trackByCategory"
           >
-            <td
-              class="px-4 py-2 border-b border-gray-200 sticky left-0 bg-white z-10"
-            >
-              <input
-                type="text"
-                [value]="category.name"
-                [disabled]="!config.allowEdit"
-                (change)="onCategoryNameChange(category.id, $event)"
-                class="w-full px-2 py-1 border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
-              />
-            </td>
-            <td
-              *ngFor="let month of months; trackBy: trackByMonth"
-              class="px-4 py-2 border-b border-gray-200"
-            >
-              <input
-                type="number"
-                [value]="getCategoryValue(category, month.key)"
-                [disabled]="!config.allowEdit"
-                (input)="onCellValueChange(category.id, month.key, $event)"
-                (contextmenu)="onContextMenu($event, category.id, month.key)"
-                class="w-full px-2 py-1 text-right border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
-                placeholder="0"
-              />
-            </td>
-            <td
-              *ngIf="config.showTotalColumn"
-              class="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200"
-            >
-              ${{ formatCurrency(getCategoryTotal(category)) }}
-            </td>
-            <td class="px-4 py-2 border-b border-gray-200">
-              <button
-                *ngIf="config.allowDelete"
-                mat-mini-fab
-                color="warning"
-                (click)="onDeleteCategory(category.id)"
-                class="!scale-75 hover:!bg-red-400"
-                matTooltip="Delete row"
+            <!-- Parent Category Row -->
+            <tr *ngIf="category.isParent" class="bg-red-100 font-semibold">
+              <td
+                class="px-4 py-2 border-b border-gray-200 sticky left-0 bg-red-100 z-10"
               >
-                <mat-icon class="!scale-90">delete</mat-icon>
-              </button>
-            </td>
-          </tr>
+                <div class="flex items-center gap-2">
+                  <mat-icon
+                    class="!w-4 !h-4 cursor-pointer"
+                    (click)="toggleCategoryExpand(category.id)"
+                  >
+                    {{ isCategoryExpanded(category.id) ? 'expand_more' :
+                    'chevron_right' }}
+                  </mat-icon>
+                  <input
+                    type="text"
+                    [value]="category.name"
+                    [disabled]="!config.allowEdit"
+                    (change)="onCategoryNameChange(category.id, $event)"
+                    class="w-full px-2 py-1 font-semibold bg-transparent border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
+                  />
+                </div>
+              </td>
+              <td
+                *ngFor="let month of months; trackBy: trackByMonth"
+                class="px-4 py-2 text-right font-semibold border-b border-gray-200"
+              >
+                ${{ formatCurrency(getParentCategoryTotal(category, month.key))
+                }}
+              </td>
+              <td
+                *ngIf="config.showTotalColumn"
+                class="px-4 py-2 text-right font-semibold border-b border-gray-200"
+              >
+                ${{ formatCurrency(getParentCategoryGrandTotal(category)) }}
+              </td>
+              <td class="px-4 py-2 border-b border-gray-200">
+                <button
+                  mat-mini-fab
+                  color="primary"
+                  (click)="onAddChildCategory(category.id)"
+                  class="!bg-red-500 hover:!bg-red-600 !scale-75"
+                  matTooltip="Add sub-category"
+                >
+                  <mat-icon class="!scale-90">add</mat-icon>
+                </button>
+                <button
+                  *ngIf="config.allowDelete"
+                  mat-mini-fab
+                  color="warn"
+                  (click)="onDeleteCategory(category.id)"
+                  class="!scale-75 ml-1 hover:!bg-red-600"
+                  matTooltip="Delete category group"
+                >
+                  <mat-icon class="!scale-90">delete</mat-icon>
+                </button>
+              </td>
+            </tr>
+
+            <!-- Child Categories (Indented) -->
+            <ng-container
+              *ngIf="category.isParent && isCategoryExpanded(category.id)"
+            >
+              <tr
+                *ngFor="let child of getChildCategories(category.id)"
+                class="hover:bg-gray-50"
+              >
+                <td
+                  class="px-4 py-2 border-b border-gray-200 sticky left-0 bg-white z-10 pl-12"
+                >
+                  <div class="flex items-center gap-2">
+                    <div class="w-4 h-4"></div>
+                    <!-- Spacer for alignment -->
+                    <input
+                      type="text"
+                      [value]="child.name"
+                      [disabled]="!config.allowEdit"
+                      (change)="onCategoryNameChange(child.id, $event)"
+                      (keydown.enter)="onAddCategoryAfter(child.id, $event)"
+                      class="w-full px-2 py-1 border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
+                    />
+                  </div>
+                </td>
+                <td
+                  *ngFor="let month of months; trackBy: trackByMonth"
+                  class="px-4 py-2 border-b border-gray-200"
+                >
+                  <input
+                    type="number"
+                    [value]="getCategoryValue(child, month.key)"
+                    [disabled]="!config.allowEdit"
+                    (input)="onCellValueChange(child.id, month.key, $event)"
+                    (contextmenu)="onContextMenu($event, child.id, month.key)"
+                    class="w-full px-2 py-1 text-right border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
+                    placeholder="0"
+                  />
+                </td>
+                <td
+                  *ngIf="config.showTotalColumn"
+                  class="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200"
+                >
+                  ${{ formatCurrency(getCategoryTotal(child)) }}
+                </td>
+                <td class="px-4 py-2 border-b border-gray-200">
+                  <button
+                    *ngIf="config.allowDelete"
+                    mat-mini-fab
+                    color="warn"
+                    (click)="onDeleteCategory(child.id)"
+                    class="!scale-75 hover:!bg-red-600"
+                    matTooltip="Delete sub-category"
+                  >
+                    <mat-icon class="!scale-90">delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            </ng-container>
+
+            <!-- Regular Category Row (No Parent) -->
+            <tr
+              *ngIf="!category.isParent && !category.parentId"
+              class="hover:bg-gray-50"
+            >
+              <td
+                class="px-4 py-2 border-b border-gray-200 sticky left-0 bg-white z-10"
+              >
+                <input
+                  type="text"
+                  [value]="category.name"
+                  [disabled]="!config.allowEdit"
+                  (change)="onCategoryNameChange(category.id, $event)"
+                  (keydown.enter)="onAddCategoryAfter(category.id, $event)"
+                  class="w-full px-2 py-1 border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
+                />
+              </td>
+              <td
+                *ngFor="let month of months; trackBy: trackByMonth"
+                class="px-4 py-2 border-b border-gray-200"
+              >
+                <input
+                  type="number"
+                  [value]="getCategoryValue(category, month.key)"
+                  [disabled]="!config.allowEdit"
+                  (input)="onCellValueChange(category.id, month.key, $event)"
+                  (contextmenu)="onContextMenu($event, category.id, month.key)"
+                  class="w-full px-2 py-1 text-right border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
+                  placeholder="0"
+                />
+              </td>
+              <td
+                *ngIf="config.showTotalColumn"
+                class="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200"
+              >
+                ${{ formatCurrency(getCategoryTotal(category)) }}
+              </td>
+              <td class="px-4 py-2 border-b border-gray-200">
+                <button
+                  *ngIf="config.allowDelete"
+                  mat-mini-fab
+                  color="warn"
+                  (click)="onDeleteCategory(category.id)"
+                  class="!scale-75 hover:!bg-red-600"
+                  matTooltip="Delete Category"
+                >
+                  <mat-icon class="!scale-90">delete</mat-icon>
+                </button>
+              </td>
+            </tr>
+          </ng-container>
         </ng-container>
 
         <!-- Closing Balance -->
@@ -248,6 +495,35 @@
             class="px-4 py-3 border-t-2 border-gray-300"
           ></td>
           <td class="px-4 py-3 border-t-2 border-gray-300"></td>
+        </tr>
+
+        <!-- Grand Totals Footer -->
+        <tr class="bg-gray-100 font-bold border-t-4 border-gray-300">
+          <td class="px-4 py-3 sticky left-0 bg-gray-100 z-10">GRAND TOTALS</td>
+          <td *ngFor="let month of months" class="px-4 py-3 text-right">
+            <div class="text-green-700">
+              Income: ${{ formatCurrency(incomeTotals[month.key] || 0) }}
+            </div>
+            <div class="text-red-700">
+              Expenses: ${{ formatCurrency(expenseTotals[month.key] || 0) }}
+            </div>
+            <div class="text-blue-700">
+              Net: ${{ formatCurrency((incomeTotals[month.key] || 0) -
+              (expenseTotals[month.key] || 0)) }}
+            </div>
+          </td>
+          <td *ngIf="config.showTotalColumn" class="px-4 py-3 text-right">
+            <div class="text-green-700">
+              ${{ formatCurrency(getTotalIncome()) }}
+            </div>
+            <div class="text-red-700">
+              ${{ formatCurrency(getTotalExpenses()) }}
+            </div>
+            <div class="text-blue-700">
+              ${{ formatCurrency(getTotalIncome() - getTotalExpenses()) }}
+            </div>
+          </td>
+          <td class="px-4 py-3"></td>
         </tr>
       </tbody>
     </table>

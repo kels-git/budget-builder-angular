@@ -14,6 +14,9 @@ export class BudgetService {
   readonly months = this.store.months;
   readonly monthlyTotals = this.store.monthlyTotals;
 
+  readonly groupedIncomeCategories = this.store.groupedIncomeCategories;
+  readonly groupedExpenseCategories = this.store.groupedExpenseCategories;
+
   updateDateRange = (range: any) => this.store.updateDateRange(range);
   updateCategoryValue = (id: string, key: string, val: number) =>
     this.store.updateCategoryValue(id, key, val);
@@ -28,4 +31,10 @@ export class BudgetService {
   clearAllData = () => this.store.clearAll();
   exportData = () => this.store.exportData();
   importData = (file: File) => this.store.importData(file);
+
+  addParentCategory = (type: 'income' | 'expense', name: string) =>
+    this.store.addParentCategory(type, name);
+
+  addChildCategory = (parentId: string, type: 'income' | 'expense') =>
+    this.store.addChildCategory(parentId, type);
 }

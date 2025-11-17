@@ -122,4 +122,16 @@ export class BudgetTableComponent {
 
     return openingBalances;
   }
+
+  onChildCategoryAdd(parentId: string): void {
+    const allCategories = [
+      ...this.budgetService.incomeCategories(),
+      ...this.budgetService.expenseCategories(),
+    ];
+    const parent = allCategories.find((c) => c.id === parentId);
+
+    if (parent) {
+      this.budgetService.addChildCategory(parentId, parent.type);
+    }
+  }
 }
