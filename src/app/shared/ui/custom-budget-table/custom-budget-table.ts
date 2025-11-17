@@ -1,0 +1,87 @@
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { BudgetCategory, MonthInfo } from '../../../models/date-range.model';
+import { BudgetTableConfig, CategoryEvent } from '../../../typings/budget-typings';
+
+@Component({
+  selector: 'app-custom-budget-table',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './custom-budget-table.html'
+})
+export class CustomBudgetTableComponent {
+  @Input() months: MonthInfo[] = [];
+  @Input() incomeCategories: BudgetCategory[] = [];
+  @Input() expenseCategories: BudgetCategory[] = [];
+  @Input() openingBalances: { [key: string]: number } = {};
+  @Input() closingBalances: { [key: string]: number } = {};
+  @Input() incomeTotals: { [key: string]: number } = {};
+  @Input() expenseTotals: { [key: string]: number } = {};
+  @Input() config: BudgetTableConfig = {
+    showOpeningBalance: true,
+    showClosingBalance: true,
+    showTotalColumn: true,
+    allowDelete: true,
+    allowEdit: true
+  };
+
+  @Output() categoryValueChange = new EventEmitter<CategoryEvent>();
+  @Output() categoryNameChange = new EventEmitter<CategoryEvent>();
+  @Output() categoryDelete = new EventEmitter<string>();
+  @Output() categoryAdd = new EventEmitter<'income' | 'expense'>();
+  @Output() contextMenuOpen = new EventEmitter<{ event: MouseEvent; categoryId: string; monthKey: string }>();
+
+  expandedSections = {
+    income: true,
+    expenses: true
+  };
+
+  toggleSection(section: 'income' | 'expenses'): void {
+    this.expandedSections[section] = !this.expandedSections[section];
+  }
+
+  onCellValueChange(categoryId: string, monthKey: string, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = parseFloat(input.value) || 0;
+    this.categoryValueChange.emit({ categoryId, monthKey, value });
+  }
+
+  onCategoryNameChange(categoryId: string, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.categoryNameChange.emit({ categoryId, name: input.value });
+  }
+
+  onDeleteCategory(categoryId: string): void {
+    this.categoryDelete.emit(categoryId);
+  }
+
+  onAddCategory(type: 'income' | 'expense'): void {
+    this.categoryAdd.emit(type);
+  }
+
+  onContextMenu(event: MouseEvent, categoryId: string, monthKey: string): void {
+    this.contextMenuOpen.emit({ event, categoryId, monthKey });
+  }
+
+  getCategoryValue(category: BudgetCategory, monthKey: string): number {
+    return category.values?.[monthKey] || 0;
+  }
+
+  getCategoryTotal(category: BudgetCategory): number {
+    if (!category?.values) return 0;
+    return Object.values(category.values).reduce((sum: number, val: number) => sum + (val || 0), 0);
+  }
+
+  getTotalIncome(): number {
+    return Object.values(this.incomeTotals).reduce((a, b) => a + b, 0);
+  }
+
+  getTotalExpenses(): number {
+    return Object.values(this.expenseTotals).reduce((a, b) => a + b, 0);
+  }
+
+  formatCurrency(value: number): string {
+    return value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  }
+}

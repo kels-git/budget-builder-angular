@@ -1,0 +1,44 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-[1600px] mx-auto">
+    <app-date-range-header
+      [title]="'Budget Builder'"
+      [dateRange]="budgetService.dateRange()"
+      [monthCount]="budgetService.months().length"
+      (startMonthChange)="onStartMonthChange($event)"
+      (endMonthChange)="onEndMonthChange($event)"
+      (export)="budgetService.exportData()"
+      (import)="budgetService.importData($event)"
+      (clear)="budgetService.clearAllData()"
+    >
+    </app-date-range-header>
+
+    <app-custom-budget-table
+      [months]="budgetService.months()"
+      [incomeCategories]="budgetService.incomeCategories()"
+      [expenseCategories]="budgetService.expenseCategories()"
+      [openingBalances]="getOpeningBalancesMap()"
+      [closingBalances]="budgetService.monthlyTotals().closingBalance"
+      [incomeTotals]="budgetService.monthlyTotals().income"
+      [expenseTotals]="budgetService.monthlyTotals().expenses"
+      [config]="{
+        showOpeningBalance: true,
+        showClosingBalance: true,
+        showTotalColumn: true,
+        allowDelete: true,
+        allowEdit: true
+      }"
+      (categoryValueChange)="onCategoryValueChange($event)"
+      (categoryNameChange)="onCategoryNameChange($event)"
+      (categoryDelete)="deleteCategory($event)"
+      (categoryAdd)="addCategory($event)"
+      (contextMenuOpen)="onContextMenuOpen($event)"
+    >
+    </app-custom-budget-table>
+  </div>
+</div>
+<app-context-menu
+  [data]="contextMenuData"
+  (applyToAll)="onApplyToAll()"
+  (close)="contextMenuData = null"
+>
+</app-context-menu>

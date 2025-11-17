@@ -1,0 +1,5 @@
+const STORAGE_KEY = 'budget-app-state';
+const DEFAULT_START_MONTH =  '2024-01';
+const DEFAULT_END_MONTH = '2024-12';
+
+export { STORAGE_KEY, DEFAULT_START_MONTH, DEFAULT_END_MONTH};

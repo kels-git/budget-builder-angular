@@ -1,0 +1,50 @@
+<div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-3xl font-bold text-gray-900">{{ title }}</h1>
+
+    <div class="flex items-center gap-2">
+      <button 
+        (click)="onExport()"
+        class="px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+        📥 Export
+      </button>
+      
+      <label class="px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition-colors cursor-pointer">
+        📤 Import
+        <input type="file" accept=".json" (change)="onImport($event)" class="hidden">
+      </label>
+      
+      <button 
+        (click)="onClear()"
+        class="px-3 py-1.5 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors">
+        🗑️ Clear
+      </button>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-4 flex-wrap">
+    <div class="flex items-center gap-2">
+      <label class="text-sm font-medium text-gray-700">Start Month:</label>
+      <input
+        type="month"
+        [value]="dateRange.startMonth"
+        (change)="onStartChange($event)"
+        class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      />
+    </div>
+
+    <div class="flex items-center gap-2">
+      <label class="text-sm font-medium text-gray-700">End Month:</label>
+      <input
+        type="month"
+        [value]="dateRange.endMonth"
+        (change)="onEndChange($event)"
+        class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      />
+    </div>
+
+    <div class="ml-auto text-sm text-gray-600 bg-blue-50 px-4 py-2 rounded-lg">
+      {{ monthCount }} months selected
+    </div>
+  </div>
+</div>
