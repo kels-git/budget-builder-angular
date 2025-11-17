@@ -2,13 +2,25 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BudgetCategory, MonthInfo } from '../../../models/date-range.model';
-import { BudgetTableConfig, CategoryEvent } from '../../../typings/budget-typings';
+import {
+  BudgetTableConfig,
+  CategoryEvent,
+} from '../../../typings/budget-typings';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-custom-budget-table',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './custom-budget-table.html'
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+  ],
+  templateUrl: './custom-budget-table.html',
 })
 export class CustomBudgetTableComponent {
   @Input() months: MonthInfo[] = [];
@@ -23,18 +35,22 @@ export class CustomBudgetTableComponent {
     showClosingBalance: true,
     showTotalColumn: true,
     allowDelete: true,
-    allowEdit: true
+    allowEdit: true,
   };
 
   @Output() categoryValueChange = new EventEmitter<CategoryEvent>();
   @Output() categoryNameChange = new EventEmitter<CategoryEvent>();
   @Output() categoryDelete = new EventEmitter<string>();
   @Output() categoryAdd = new EventEmitter<'income' | 'expense'>();
-  @Output() contextMenuOpen = new EventEmitter<{ event: MouseEvent; categoryId: string; monthKey: string }>();
+  @Output() contextMenuOpen = new EventEmitter<{
+    event: MouseEvent;
+    categoryId: string;
+    monthKey: string;
+  }>();
 
   expandedSections = {
     income: true,
-    expenses: true
+    expenses: true,
   };
 
   toggleSection(section: 'income' | 'expenses'): void {
@@ -70,7 +86,10 @@ export class CustomBudgetTableComponent {
 
   getCategoryTotal(category: BudgetCategory): number {
     if (!category?.values) return 0;
-    return Object.values(category.values).reduce((sum: number, val: number) => sum + (val || 0), 0);
+    // return Object.values(category.values).reduce((sum: number, val: number) => sum + (val || 0), 0);
+    return this.months.reduce((sum, month) => {
+      return sum + (category.values[month.key] || 0);
+    }, 0);
   }
 
   getTotalIncome(): number {
@@ -82,6 +101,17 @@ export class CustomBudgetTableComponent {
   }
 
   formatCurrency(value: number): string {
-    return value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    return value.toLocaleString('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+  }
+
+  trackByCategory(index: number, category: BudgetCategory): string {
+    return category.id;
+  }
+
+  trackByMonth(index: number, month: MonthInfo): string {
+    return month.key;
   }
 }

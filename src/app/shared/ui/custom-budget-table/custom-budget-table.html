@@ -1,174 +1,249 @@
 <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="w-full border-collapse min-w-[1200px]">
-        <!-- Header -->
-        <thead class="bg-gray-100 sticky top-0 z-10">
-          <tr>
-            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b-2 border-gray-300 w-64 sticky left-0 bg-gray-100 z-20">
-              Category
-            </th>
-            <th *ngFor="let month of months" 
-                class="px-4 py-3 text-right text-sm font-semibold text-gray-700 border-b-2 border-gray-300 w-32">
-              {{ month.name }} {{ month.year }}
-            </th>
-            <th *ngIf="config.showTotalColumn" 
-                class="px-4 py-3 text-right text-sm font-semibold text-gray-700 border-b-2 border-gray-300 w-32">
-              Total
-            </th>
-            <th class="px-4 py-3 border-b-2 border-gray-300 w-16"></th>
-          </tr>
-        </thead>
-  
-        <tbody>
-          <!-- Opening Balance -->
-          <tr *ngIf="config.showOpeningBalance" class="bg-blue-50">
-            <td class="px-4 py-3 font-semibold text-gray-900 border-b border-gray-200 sticky left-0 bg-blue-50 z-10">
-              Opening Balance
+  <div class="overflow-x-auto">
+    <table class="w-full border-collapse min-w-[1200px]">
+      <!-- Header -->
+      <thead class="bg-gray-100 sticky top-0 z-10">
+        <tr>
+          <th
+            class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b-2 border-gray-300 w-64 sticky left-0 bg-gray-100 z-20"
+          >
+            Category
+          </th>
+          <th
+            *ngFor="let month of months"
+            class="px-4 py-3 text-right text-sm font-semibold text-gray-700 border-b-2 border-gray-300 w-32"
+          >
+            {{ month.name }} {{ month.year }}
+          </th>
+          <th
+            *ngIf="config.showTotalColumn"
+            class="px-4 py-3 text-right text-sm font-semibold text-gray-700 border-b-2 border-gray-300 w-32"
+          >
+            Total
+          </th>
+          <th class="px-4 py-3 border-b-2 border-gray-300 w-16"></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <!-- Opening Balance -->
+        <tr *ngIf="config.showOpeningBalance" class="bg-blue-50">
+          <td
+            class="px-4 py-3 font-semibold text-gray-900 border-b border-gray-200 sticky left-0 bg-blue-50 z-10"
+          >
+            Opening Balance
+          </td>
+          <td
+            *ngFor="let month of months"
+            class="px-4 py-3 text-right font-medium text-gray-900 border-b border-gray-200"
+          >
+            ${{ formatCurrency(openingBalances[month.key] || 0) }}
+          </td>
+          <td
+            *ngIf="config.showTotalColumn"
+            class="px-4 py-3 border-b border-gray-200"
+          ></td>
+          <td class="px-4 py-3 border-b border-gray-200"></td>
+        </tr>
+
+        <!-- Income Section -->
+        <tr class="bg-green-50">
+          <td
+            (click)="toggleSection('income')"
+            class="px-4 py-3 font-bold text-green-800 border-b border-gray-200 cursor-pointer sticky left-0 bg-green-50 z-10"
+          >
+            <div class="flex items-center gap-2">
+              <span>{{ expandedSections.income ? '▼' : '►' }}</span>
+              <span>INCOME</span>
+            </div>
+          </td>
+          <td
+            *ngFor="let month of months"
+            class="px-4 py-3 text-right font-bold text-green-800 border-b border-gray-200"
+          >
+            ${{ formatCurrency(incomeTotals[month.key] || 0) }}
+          </td>
+          <td
+            *ngIf="config.showTotalColumn"
+            class="px-4 py-3 text-right font-bold text-green-800 border-b border-gray-200"
+          >
+            ${{ formatCurrency(getTotalIncome()) }}
+          </td>
+          <td class="px-4 py-3 border-b border-gray-200">
+            <button
+              mat-mini-fab
+              color="primary"
+              (click)="onAddCategory('income')"
+              class="!bg-green-500 hover:!bg-green-600 !scale-75"
+              matTooltip="Add Income Category"
+            >
+              <mat-icon class="!scale-90">add</mat-icon>
+            </button>
+          </td>
+        </tr>
+
+        <!-- Income Categories -->
+        <ng-container *ngIf="expandedSections.income">
+          <tr
+            *ngFor="let category of incomeCategories; trackBy: trackByCategory"
+            class="hover:bg-gray-50"
+          >
+            <td
+              class="px-4 py-2 border-b border-gray-200 sticky left-0 bg-white z-10"
+            >
+              <input
+                type="text"
+                [value]="category.name"
+                [disabled]="!config.allowEdit"
+                (change)="onCategoryNameChange(category.id, $event)"
+                class="w-full px-2 py-1 border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
+              />
             </td>
-            <td *ngFor="let month of months" 
-                class="px-4 py-3 text-right font-medium text-gray-900 border-b border-gray-200">
-              ${{ formatCurrency(openingBalances[month.key] || 0) }}
+            <td
+              *ngFor="let month of months; trackBy: trackByMonth"
+              class="px-4 py-2 border-b border-gray-200"
+            >
+              <input
+                type="number"
+                [value]="getCategoryValue(category, month.key)"
+                [disabled]="!config.allowEdit"
+                (input)="onCellValueChange(category.id, month.key, $event)"
+                (contextmenu)="onContextMenu($event, category.id, month.key)"
+                class="w-full px-2 py-1 text-right border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
+                placeholder="0"
+              />
             </td>
-            <td *ngIf="config.showTotalColumn" class="px-4 py-3 border-b border-gray-200"></td>
-            <td class="px-4 py-3 border-b border-gray-200"></td>
-          </tr>
-  
-          <!-- Income Section -->
-          <tr class="bg-green-50">
-            <td (click)="toggleSection('income')"
-                class="px-4 py-3 font-bold text-green-800 border-b border-gray-200 cursor-pointer sticky left-0 bg-green-50 z-10">
-              <div class="flex items-center gap-2">
-                <span>{{ expandedSections.income ? '▼' : '►' }}</span>
-                <span>INCOME</span>
-              </div>
+            <td
+              *ngIf="config.showTotalColumn"
+              class="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200"
+            >
+              ${{ formatCurrency(getCategoryTotal(category)) }}
             </td>
-            <td *ngFor="let month of months" 
-                class="px-4 py-3 text-right font-bold text-green-800 border-b border-gray-200">
-              ${{ formatCurrency(incomeTotals[month.key] || 0) }}
-            </td>
-            <td *ngIf="config.showTotalColumn" 
-                class="px-4 py-3 text-right font-bold text-green-800 border-b border-gray-200">
-              ${{ formatCurrency(getTotalIncome()) }}
-            </td>
-            <td class="px-4 py-3 border-b border-gray-200">
-              <button (click)="onAddCategory('income')"
-                      class="p-1 hover:bg-green-200 rounded transition-colors"
-                      title="Add income row">
-                ➕
+            <td class="px-4 py-2 border-b border-gray-200">
+              <button
+                *ngIf="config.allowDelete"
+                mat-mini-fab
+                color="warning"
+                (click)="onDeleteCategory(category.id)"
+                class="!scale-75 hover:!bg-red-400"
+                matTooltip="Delete Category"
+              >
+                <mat-icon class="!scale-90">delete</mat-icon>
               </button>
             </td>
           </tr>
-  
-          <!-- Income Categories -->
-          <ng-container *ngIf="expandedSections.income">
-            <tr *ngFor="let category of incomeCategories" class="hover:bg-gray-50">
-              <td class="px-4 py-2 border-b border-gray-200 sticky left-0 bg-white z-10">
-                <input type="text"
-                       [value]="category.name"
-                       [disabled]="!config.allowEdit"
-                       (change)="onCategoryNameChange(category.id, $event)"
-                       class="w-full px-2 py-1 border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded" />
-              </td>
-              <td *ngFor="let month of months" 
-                  class="px-4 py-2 border-b border-gray-200">
-                <input type="number"
-                       [value]="getCategoryValue(category, month.key)"
-                       [disabled]="!config.allowEdit"
-                       (input)="onCellValueChange(category.id, month.key, $event)"
-                       (contextmenu)="onContextMenu($event, category.id, month.key)"
-                       class="w-full px-2 py-1 text-right border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
-                       placeholder="0" />
-              </td>
-              <td *ngIf="config.showTotalColumn" 
-                  class="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
-                ${{ formatCurrency(getCategoryTotal(category)) }}
-              </td>
-              <td class="px-4 py-2 border-b border-gray-200">
-                <button *ngIf="config.allowDelete"
-                        (click)="onDeleteCategory(category.id)"
-                        class="p-1 hover:bg-red-100 rounded transition-colors"
-                        title="Delete row">
-                  🗑️
-                </button>
-              </td>
-            </tr>
-          </ng-container>
-  
-          <!-- Expenses Section -->
-          <tr class="bg-red-50">
-            <td (click)="toggleSection('expenses')"
-                class="px-4 py-3 font-bold text-red-800 border-b border-gray-200 cursor-pointer sticky left-0 bg-red-50 z-10">
-              <div class="flex items-center gap-2">
-                <span>{{ expandedSections.expenses ? '▼' : '►' }}</span>
-                <span>EXPENSES</span>
-              </div>
+        </ng-container>
+
+        <!-- Expenses Section -->
+        <tr class="bg-red-50">
+          <td
+            (click)="toggleSection('expenses')"
+            class="px-4 py-3 font-bold text-red-800 border-b border-gray-200 cursor-pointer sticky left-0 bg-red-50 z-10"
+          >
+            <div class="flex items-center gap-2">
+              <span>{{ expandedSections.expenses ? '▼' : '►' }}</span>
+              <span>EXPENSES</span>
+            </div>
+          </td>
+          <td
+            *ngFor="let month of months"
+            class="px-4 py-3 text-right font-bold text-red-800 border-b border-gray-200"
+          >
+            ${{ formatCurrency(expenseTotals[month.key] || 0) }}
+          </td>
+          <td
+            *ngIf="config.showTotalColumn"
+            class="px-4 py-3 text-right font-bold text-red-800 border-b border-gray-200"
+          >
+            ${{ formatCurrency(getTotalExpenses()) }}
+          </td>
+          <td class="px-4 py-3 border-b border-gray-200">
+            <button
+              mat-mini-fab
+              color="primary"
+              (click)="onAddCategory('expense')"
+              class="!bg-green-500 hover:!bg-green-600 !scale-75"
+              matTooltip="Add expense row"
+            >
+              <mat-icon class="!scale-90">add</mat-icon>
+            </button>
+          </td>
+        </tr>
+
+        <!-- Expense Categories -->
+        <ng-container *ngIf="expandedSections.expenses">
+          <tr
+            *ngFor="let category of expenseCategories; trackBy: trackByCategory"
+            class="hover:bg-gray-50"
+          >
+            <td
+              class="px-4 py-2 border-b border-gray-200 sticky left-0 bg-white z-10"
+            >
+              <input
+                type="text"
+                [value]="category.name"
+                [disabled]="!config.allowEdit"
+                (change)="onCategoryNameChange(category.id, $event)"
+                class="w-full px-2 py-1 border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
+              />
             </td>
-            <td *ngFor="let month of months" 
-                class="px-4 py-3 text-right font-bold text-red-800 border-b border-gray-200">
-              ${{ formatCurrency(expenseTotals[month.key] || 0) }}
+            <td
+              *ngFor="let month of months; trackBy: trackByMonth"
+              class="px-4 py-2 border-b border-gray-200"
+            >
+              <input
+                type="number"
+                [value]="getCategoryValue(category, month.key)"
+                [disabled]="!config.allowEdit"
+                (input)="onCellValueChange(category.id, month.key, $event)"
+                (contextmenu)="onContextMenu($event, category.id, month.key)"
+                class="w-full px-2 py-1 text-right border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
+                placeholder="0"
+              />
             </td>
-            <td *ngIf="config.showTotalColumn" 
-                class="px-4 py-3 text-right font-bold text-red-800 border-b border-gray-200">
-              ${{ formatCurrency(getTotalExpenses()) }}
+            <td
+              *ngIf="config.showTotalColumn"
+              class="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200"
+            >
+              ${{ formatCurrency(getCategoryTotal(category)) }}
             </td>
-            <td class="px-4 py-3 border-b border-gray-200">
-              <button (click)="onAddCategory('expense')"
-                      class="p-1 hover:bg-red-200 rounded transition-colors"
-                      title="Add expense row">
-                ➕
+            <td class="px-4 py-2 border-b border-gray-200">
+              <button
+                *ngIf="config.allowDelete"
+                mat-mini-fab
+                color="warning"
+                (click)="onDeleteCategory(category.id)"
+                class="!scale-75 hover:!bg-red-400"
+                matTooltip="Delete row"
+              >
+                <mat-icon class="!scale-90">delete</mat-icon>
               </button>
             </td>
           </tr>
-  
-          <!-- Expense Categories -->
-          <ng-container *ngIf="expandedSections.expenses">
-            <tr *ngFor="let category of expenseCategories" class="hover:bg-gray-50">
-              <td class="px-4 py-2 border-b border-gray-200 sticky left-0 bg-white z-10">
-                <input type="text"
-                       [value]="category.name"
-                       [disabled]="!config.allowEdit"
-                       (change)="onCategoryNameChange(category.id, $event)"
-                       class="w-full px-2 py-1 border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded" />
-              </td>
-              <td *ngFor="let month of months" 
-                  class="px-4 py-2 border-b border-gray-200">
-                <input type="number"
-                       [value]="getCategoryValue(category, month.key)"
-                       [disabled]="!config.allowEdit"
-                       (input)="onCellValueChange(category.id, month.key, $event)"
-                       (contextmenu)="onContextMenu($event, category.id, month.key)"
-                       class="w-full px-2 py-1 text-right border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
-                       placeholder="0" />
-              </td>
-              <td *ngIf="config.showTotalColumn" 
-                  class="px-4 py-2 text-right font-medium text-gray-700 border-b border-gray-200">
-                ${{ formatCurrency(getCategoryTotal(category)) }}
-              </td>
-              <td class="px-4 py-2 border-b border-gray-200">
-                <button *ngIf="config.allowDelete"
-                        (click)="onDeleteCategory(category.id)"
-                        class="p-1 hover:bg-red-100 rounded transition-colors"
-                        title="Delete row">
-                  🗑️
-                </button>
-              </td>
-            </tr>
-          </ng-container>
-  
-          <!-- Closing Balance -->
-          <tr *ngIf="config.showClosingBalance" class="bg-blue-50 font-bold">
-            <td class="px-4 py-3 text-gray-900 border-t-2 border-gray-300 sticky left-0 bg-blue-50 z-10">
-              Closing Balance
-            </td>
-            <td *ngFor="let month of months" 
-                [class]="(closingBalances[month.key] || 0) >= 0 ? 'text-green-700' : 'text-red-700'"
-                class="px-4 py-3 text-right border-t-2 border-gray-300">
-              ${{ formatCurrency(closingBalances[month.key] || 0) }}
-            </td>
-            <td *ngIf="config.showTotalColumn" class="px-4 py-3 border-t-2 border-gray-300"></td>
-            <td class="px-4 py-3 border-t-2 border-gray-300"></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+        </ng-container>
+
+        <!-- Closing Balance -->
+        <tr *ngIf="config.showClosingBalance" class="bg-blue-50 font-bold">
+          <td
+            class="px-4 py-3 text-gray-900 border-t-2 border-gray-300 sticky left-0 bg-blue-50 z-10"
+          >
+            Closing Balance
+          </td>
+          <td
+            *ngFor="let month of months"
+            class="px-4 py-3 text-right border-t-2 border-gray-300"
+            [class.text-green-700]="(closingBalances[month.key] || 0) >= 0"
+            [class.text-red-700]="(closingBalances[month.key] || 0) < 0"
+          >
+            ${{ formatCurrency(closingBalances[month.key] || 0) }}
+          </td>
+          <td
+            *ngIf="config.showTotalColumn"
+            class="px-4 py-3 border-t-2 border-gray-300"
+          ></td>
+          <td class="px-4 py-3 border-t-2 border-gray-300"></td>
+        </tr>
+      </tbody>
+    </table>
   </div>
+</div>

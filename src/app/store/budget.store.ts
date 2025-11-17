@@ -1,5 +1,10 @@
 import { Injectable, signal, computed, effect } from '@angular/core';
-import { BudgetCategory, BudgetState, DateRange, MonthInfo } from '../models/date-range.model';
+import {
+  BudgetCategory,
+  BudgetState,
+  DateRange,
+  MonthInfo,
+} from '../models/date-range.model';
 import { MonthlyTotals } from '../models/budget.model';
 import { DEFAULT_END_MONTH, DEFAULT_START_MONTH, STORAGE_KEY } from '../enums';
 
@@ -7,7 +12,7 @@ import { DEFAULT_END_MONTH, DEFAULT_START_MONTH, STORAGE_KEY } from '../enums';
   providedIn: 'root',
 })
 export class BudgetStore {
-  private openingBalanceSignal = signal<number>(0);
+  // private openingBalanceSignal = signal<number>(0);
 
   private loadState(): BudgetState {
     try {
@@ -47,10 +52,14 @@ export class BudgetStore {
   });
 
   readonly monthlyTotals = computed<MonthlyTotals>(() => {
-    const months = this.months();
-    const incomeCats = this.incomeCategories();
-    const expenseCats = this.expenseCategories();
-    return this.calculateTotals(months, incomeCats, expenseCats);
+    const state = this.state();
+
+    return this.calculateTotals(
+      this.months(),
+      state.incomeCategories,
+      state.expenseCategories,
+      state.openingBalance
+    );
   });
 
   constructor() {
@@ -258,14 +267,16 @@ export class BudgetStore {
   private calculateTotals(
     months: MonthInfo[],
     income: BudgetCategory[],
-    expenses: BudgetCategory[]
+    expenses: BudgetCategory[],
+    openingBalance: number
   ): MonthlyTotals {
     const incomeTotals: { [monthKey: string]: number } = {};
     const expenseTotals: { [monthKey: string]: number } = {};
     const netIncome: { [monthKey: string]: number } = {};
     const closingBalance: { [monthKey: string]: number } = {};
 
-    let runningBalance = this.openingBalanceSignal();
+    // let runningBalance = this.openingBalanceSignal();
+    let runningBalance = openingBalance;
 
     months.forEach((month) => {
       const monthIncome = income.reduce((sum, category) => {
@@ -283,6 +294,8 @@ export class BudgetStore {
       expenseTotals[month.key] = monthExpenses;
       netIncome[month.key] = net;
       closingBalance[month.key] = currentClosingBalance;
+
+      runningBalance = currentClosingBalance;
     });
 
     return {
