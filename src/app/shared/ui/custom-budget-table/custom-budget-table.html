@@ -71,7 +71,7 @@
           >
             ${{ formatCurrency(getTotalIncome()) }}
           </td>
-          <td class="px-4 py-3 border-b border-gray-200">
+          <!-- <td class="px-4 py-3 border-b border-gray-200">
             <button
               mat-mini-fab
               color="primary"
@@ -81,10 +81,33 @@
             >
               <mat-icon class="!scale-90">add</mat-icon>
             </button>
+          </td> -->
+
+          <td class="px-4 py-3 border-b border-gray-200">
+            <div class="flex gap-1">
+              <button
+                mat-mini-fab
+                color="primary"
+                (click)="onAddParentCategory('income')"
+                class="!bg-green-600 hover:!bg-green-700 !scale-75"
+                matTooltip="Add Income Group"
+              >
+                <mat-icon class="!scale-90">folder</mat-icon>
+              </button>
+              <button
+                mat-mini-fab
+                color="primary"
+                (click)="onAddCategory('income')"
+                class="!bg-green-500 hover:!bg-green-600 !scale-75"
+                matTooltip="Add Income Row"
+              >
+                <mat-icon class="!scale-90">add</mat-icon>
+              </button>
+            </div>
           </td>
+
         </tr>
 
-        <!-- Income Categories -->
         <!-- Income Categories with Parent/Child Support -->
         <ng-container *ngIf="expandedSections.income">
           <ng-container
@@ -97,7 +120,7 @@
               >
                 <div class="flex items-center gap-2">
                   <mat-icon
-                    class="!w-4 !h-4 cursor-pointer"
+                    class="!w-5 !h-5 cursor-pointer"
                     (click)="toggleCategoryExpand(category.id)"
                   >
                     {{ isCategoryExpanded(category.id) ? 'expand_more' :
@@ -180,10 +203,11 @@
                     type="number"
                     [value]="getCategoryValue(child, month.key)"
                     [disabled]="!config.allowEdit"
-                    (input)="onCellValueChange(child.id, month.key, $event)"
+                    (blur)="onCellValueChange(child.id, month.key, $event)"
                     (contextmenu)="onContextMenu($event, child.id, month.key)"
                     class="w-full px-2 py-1 text-right border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
                     placeholder="0"
+                    step="any"
                   />
                 </td>
                 <td
@@ -232,10 +256,11 @@
                   type="number"
                   [value]="getCategoryValue(category, month.key)"
                   [disabled]="!config.allowEdit"
-                  (input)="onCellValueChange(category.id, month.key, $event)"
+                  (blur)="onCellValueChange(category.id, month.key, $event)"
                   (contextmenu)="onContextMenu($event, category.id, month.key)"
                   class="w-full px-2 py-1 text-right border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
                   placeholder="0"
+                  step="any"
                 />
               </td>
               <td
@@ -286,7 +311,7 @@
           >
             ${{ formatCurrency(getTotalExpenses()) }}
           </td>
-          <td class="px-4 py-3 border-b border-gray-200">
+          <!-- <td class="px-4 py-3 border-b border-gray-200">
             <button
               mat-mini-fab
               color="primary"
@@ -296,10 +321,33 @@
             >
               <mat-icon class="!scale-90">add</mat-icon>
             </button>
+          </td> -->
+
+          <td class="px-4 py-3 border-b border-gray-200">
+            <div class="flex gap-1">
+              <button
+                mat-mini-fab
+                color="primary"
+                (click)="onAddParentCategory('expense')"
+                class="!bg-red-600 hover:!bg-red-700 !scale-75"
+                matTooltip="Add Expense Group"
+              >
+                <mat-icon class="!scale-90">folder</mat-icon>
+              </button>
+              <button
+                mat-mini-fab
+                color="primary"
+                (click)="onAddCategory('expense')"
+                class="!bg-red-500 hover:!bg-red-600 !scale-75"
+                matTooltip="Add Expense Row"
+              >
+                <mat-icon class="!scale-90">add</mat-icon>
+              </button>
+            </div>
           </td>
         </tr>
 
-        <!-- Expense Categories -->
+      
         <!-- Expenses Categories with Parent/Child Support -->
         <ng-container *ngIf="expandedSections.expenses">
           <ng-container
@@ -312,7 +360,7 @@
               >
                 <div class="flex items-center gap-2">
                   <mat-icon
-                    class="!w-4 !h-4 cursor-pointer"
+                    class="!w-5 !h-5 cursor-pointer"
                     (click)="toggleCategoryExpand(category.id)"
                   >
                     {{ isCategoryExpanded(category.id) ? 'expand_more' :
@@ -395,10 +443,11 @@
                     type="number"
                     [value]="getCategoryValue(child, month.key)"
                     [disabled]="!config.allowEdit"
-                    (input)="onCellValueChange(child.id, month.key, $event)"
+                    (blur)="onCellValueChange(child.id, month.key, $event)"
                     (contextmenu)="onContextMenu($event, child.id, month.key)"
                     class="w-full px-2 py-1 text-right border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
                     placeholder="0"
+                    step="any"
                   />
                 </td>
                 <td
@@ -447,10 +496,11 @@
                   type="number"
                   [value]="getCategoryValue(category, month.key)"
                   [disabled]="!config.allowEdit"
-                  (input)="onCellValueChange(category.id, month.key, $event)"
+                  (blur)="onCellValueChange(category.id, month.key, $event)"
                   (contextmenu)="onContextMenu($event, category.id, month.key)"
                   class="w-full px-2 py-1 text-right border border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded"
                   placeholder="0"
+                  step="any"
                 />
               </td>
               <td

@@ -43,6 +43,6 @@ export class ContextMenuComponent {
 
   onApplyToAll(): void {
     this.applyToAll.emit();
-    // this.close.emit();
+    this.close.emit();
   }
 }

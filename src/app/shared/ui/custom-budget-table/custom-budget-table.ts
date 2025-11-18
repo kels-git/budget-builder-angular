@@ -43,6 +43,8 @@ export class CustomBudgetTableComponent {
     allowDelete: true,
     allowEdit: true,
   };
+  @Output() parentCategoryAdd = new EventEmitter<'income' | 'expense'>();
+
   @Output() childCategoryAdd = new EventEmitter<string>();
   @Output() categoryValueChange = new EventEmitter<CategoryEvent>();
   @Output() categoryNameChange = new EventEmitter<CategoryEvent>();
@@ -58,6 +60,12 @@ export class CustomBudgetTableComponent {
     income: true,
     expenses: true,
   };
+
+  ngOnInit(): void {
+    [...this.incomeCategories, ...this.expenseCategories]
+      .filter(c => c.isParent)
+      .forEach(parent => this.expandedCategories.add(parent.id));
+  }
 
   toggleSection(section: 'income' | 'expenses'): void {
     this.expandedSections[section] = !this.expandedSections[section];
@@ -121,28 +129,29 @@ export class CustomBudgetTableComponent {
     return month.key;
   }
 
-  onAddCategoryAfter(currentCategoryId: string, event: Event): void {
-    event.preventDefault();
-    const input = event.target as HTMLInputElement;
-    const categoryType = this.incomeCategories.find(
-      (c) => c.id === currentCategoryId
-    )
-      ? 'income'
-      : 'expense';
+  // onAddCategoryAfter(currentCategoryId: string, event: Event): void {
+  //   event.preventDefault();
+  //   const input = event.target as HTMLInputElement;
+  //   const categoryType = this.incomeCategories.find(
+  //     (c) => c.id === currentCategoryId
+  //   )
+  //     ? 'income'
+  //     : 'expense';
 
-    this.categoryAdd.emit(categoryType);
+  //   this.categoryAdd.emit(categoryType);
 
-    setTimeout(() => {
-      const inputs = document.querySelectorAll('input[type="text"]');
-      const lastInput = inputs[inputs.length - 1] as HTMLInputElement;
-      lastInput?.focus();
-    }, 100);
-  }
+  //   setTimeout(() => {
+  //     const inputs = document.querySelectorAll('input[type="text"]');
+  //     const lastInput = inputs[inputs.length - 1] as HTMLInputElement;
+  //     lastInput?.focus();
+  //   }, 100);
+  // }
 
   @HostListener('document:keydown.control.enter')
   onGlobalAddShortcut(): void {
     this.onAddCategory('income');
   }
+  
 
   private expandedCategories = new Set<string>();
 
@@ -191,5 +200,42 @@ export class CustomBudgetTableComponent {
     const orphans = categories.filter((cat) => !cat.isParent && !cat.parentId);
 
     return [...parents, ...orphans];
+  }
+
+  onAddCategoryAfter(currentCategoryId: string, event: Event): void {
+    event.preventDefault();
+    
+    // Find the current category
+    const allCategories = [...this.incomeCategories, ...this.expenseCategories];
+    const currentCategory = allCategories.find(c => c.id === currentCategoryId);
+    
+    if (!currentCategory) return;
+    
+    // If this is a child category, add another child to the same parent
+    if (currentCategory.parentId) {
+      this.childCategoryAdd.emit(currentCategory.parentId);
+    } else {
+      // Otherwise add a regular category
+      this.categoryAdd.emit(currentCategory.type);
+    }
+  
+    // Focus the new input
+    setTimeout(() => {
+      const inputs = document.querySelectorAll('input[type="text"]');
+      const lastInput = inputs[inputs.length - 1] as HTMLInputElement;
+      lastInput?.focus();
+    }, 100);
+  }
+
+  onAddParentCategory(type: 'income' | 'expense'): void {
+    this.parentCategoryAdd.emit(type);
+    
+    // Focus the new parent category name input
+    setTimeout(() => {
+      const inputs = document.querySelectorAll('input[type="text"]');
+      const lastInput = inputs[inputs.length - 1] as HTMLInputElement;
+      lastInput?.focus();
+      lastInput?.select();
+    }, 100);
   }
 }

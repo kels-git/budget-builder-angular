@@ -91,12 +91,12 @@ export class BudgetTableComponent {
     };
   }
 
-  onApplyToAll(): void {
-    if (this.contextMenuData) {
-      const { categoryId, monthKey } = this.contextMenuData.cell;
-      this.budgetService.applyToAllMonths(categoryId, monthKey);
-    }
-  }
+  // onApplyToAll(): void {
+  //   if (this.contextMenuData) {
+  //     const { categoryId, monthKey } = this.contextMenuData.cell;
+  //     this.budgetService.applyToAllMonths(categoryId, monthKey);
+  //   }
+  // }
 
   addCategory(type: 'income' | 'expense'): void {
     this.budgetService.addCategory(type);
@@ -132,6 +132,19 @@ export class BudgetTableComponent {
 
     if (parent) {
       this.budgetService.addChildCategory(parentId, parent.type);
+    }
+  }
+
+  addParentCategory(type: 'income' | 'expense'): void {
+    const name = type === 'income' ? 'New Income Group' : 'New Expense Group';
+    this.budgetService.addParentCategory(type, name);
+  }
+
+  onApplyToAll(): void {
+    if (this.contextMenuData) {
+      const { categoryId, monthKey } = this.contextMenuData.cell;
+      this.budgetService.applyToAllMonths(categoryId, monthKey);
+      this.contextMenuData = null; 
     }
   }
 }
