@@ -63,8 +63,8 @@ export class CustomBudgetTableComponent {
 
   ngOnInit(): void {
     [...this.incomeCategories, ...this.expenseCategories]
-      .filter(c => c.isParent)
-      .forEach(parent => this.expandedCategories.add(parent.id));
+      .filter((c) => c.isParent)
+      .forEach((parent) => this.expandedCategories.add(parent.id));
   }
 
   toggleSection(section: 'income' | 'expenses'): void {
@@ -129,29 +129,10 @@ export class CustomBudgetTableComponent {
     return month.key;
   }
 
-  // onAddCategoryAfter(currentCategoryId: string, event: Event): void {
-  //   event.preventDefault();
-  //   const input = event.target as HTMLInputElement;
-  //   const categoryType = this.incomeCategories.find(
-  //     (c) => c.id === currentCategoryId
-  //   )
-  //     ? 'income'
-  //     : 'expense';
-
-  //   this.categoryAdd.emit(categoryType);
-
-  //   setTimeout(() => {
-  //     const inputs = document.querySelectorAll('input[type="text"]');
-  //     const lastInput = inputs[inputs.length - 1] as HTMLInputElement;
-  //     lastInput?.focus();
-  //   }, 100);
-  // }
-
   @HostListener('document:keydown.control.enter')
   onGlobalAddShortcut(): void {
     this.onAddCategory('income');
   }
-  
 
   private expandedCategories = new Set<string>();
 
@@ -167,10 +148,22 @@ export class CustomBudgetTableComponent {
     return this.expandedCategories.has(categoryId);
   }
 
+  // getChildCategories(parentId: string): BudgetCategory[] {
+  //   return [...this.incomeCategories, ...this.expenseCategories].filter(
+  //     (c) => c.parentId === parentId
+  //   );
+  // }
+
   getChildCategories(parentId: string): BudgetCategory[] {
-    return [...this.incomeCategories, ...this.expenseCategories].filter(
-      (c) => c.parentId === parentId
-    );
+    const allCategories = [...this.incomeCategories, ...this.expenseCategories];
+    const parent = allCategories.find((c) => c.id === parentId);
+
+    if (!parent) return [];
+
+    const categoriesToSearch =
+      parent.type === 'income' ? this.incomeCategories : this.expenseCategories;
+
+    return categoriesToSearch.filter((c) => c.parentId === parentId);
   }
 
   getParentCategoryTotal(parent: BudgetCategory, monthKey: string): number {
@@ -204,22 +197,20 @@ export class CustomBudgetTableComponent {
 
   onAddCategoryAfter(currentCategoryId: string, event: Event): void {
     event.preventDefault();
-    
-    // Find the current category
+
     const allCategories = [...this.incomeCategories, ...this.expenseCategories];
-    const currentCategory = allCategories.find(c => c.id === currentCategoryId);
-    
+    const currentCategory = allCategories.find(
+      (c) => c.id === currentCategoryId
+    );
+
     if (!currentCategory) return;
-    
-    // If this is a child category, add another child to the same parent
+
     if (currentCategory.parentId) {
       this.childCategoryAdd.emit(currentCategory.parentId);
     } else {
-      // Otherwise add a regular category
       this.categoryAdd.emit(currentCategory.type);
     }
-  
-    // Focus the new input
+
     setTimeout(() => {
       const inputs = document.querySelectorAll('input[type="text"]');
       const lastInput = inputs[inputs.length - 1] as HTMLInputElement;
@@ -229,8 +220,7 @@ export class CustomBudgetTableComponent {
 
   onAddParentCategory(type: 'income' | 'expense'): void {
     this.parentCategoryAdd.emit(type);
-    
-    // Focus the new parent category name input
+
     setTimeout(() => {
       const inputs = document.querySelectorAll('input[type="text"]');
       const lastInput = inputs[inputs.length - 1] as HTMLInputElement;

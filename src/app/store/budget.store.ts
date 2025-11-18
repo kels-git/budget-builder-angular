@@ -14,6 +14,12 @@ import { DEFAULT_END_MONTH, DEFAULT_START_MONTH, STORAGE_KEY } from '../enums';
 export class BudgetStore {
   // private openingBalanceSignal = signal<number>(0);
 
+  private idCounter = 0;
+
+  private generateUniqueId(prefix: string = ''): string {
+    return `${prefix}${Date.now()}-${++this.idCounter}`;
+  }
+
   private loadState(): BudgetState {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -117,7 +123,7 @@ export class BudgetStore {
   addCategory(type: 'income' | 'expense'): void {
     this.state.update((state) => {
       const newCategory: BudgetCategory = {
-        id: Date.now().toString(),
+        id: this.generateUniqueId(`${type}-`),
         name: type === 'income' ? 'New Income' : 'New Expense',
         type,
         values: {},
@@ -135,16 +141,49 @@ export class BudgetStore {
     });
   }
 
+  // deleteCategory(categoryId: string): void {
+  //   this.state.update((state) => ({
+  //     ...state,
+  //     incomeCategories: state.incomeCategories.filter(
+  //       (c) => c.id !== categoryId
+  //     ),
+  //     expenseCategories: state.expenseCategories.filter(
+  //       (c) => c.id !== categoryId
+  //     ),
+  //   }));
+  // }
+
   deleteCategory(categoryId: string): void {
-    this.state.update((state) => ({
-      ...state,
-      incomeCategories: state.incomeCategories.filter(
-        (c) => c.id !== categoryId
-      ),
-      expenseCategories: state.expenseCategories.filter(
-        (c) => c.id !== categoryId
-      ),
-    }));
+    this.state.update((state) => {
+      const categoryToDelete = [
+        ...state.incomeCategories,
+        ...state.expenseCategories,
+      ].find((c) => c.id === categoryId);
+
+      if (!categoryToDelete) return state;
+
+      if (categoryToDelete.isParent) {
+        return {
+          ...state,
+          incomeCategories: state.incomeCategories.filter(
+            (c) => c.id !== categoryId && c.parentId !== categoryId
+          ),
+          expenseCategories: state.expenseCategories.filter(
+            (c) => c.id !== categoryId && c.parentId !== categoryId
+          ),
+        };
+      }
+
+      return {
+        ...state,
+        incomeCategories: state.incomeCategories.filter(
+          (c) => c.id !== categoryId
+        ),
+        expenseCategories: state.expenseCategories.filter(
+          (c) => c.id !== categoryId
+        ),
+      };
+    });
   }
 
   applyToAllMonths(categoryId: string, monthKey: string): void {
@@ -331,13 +370,13 @@ export class BudgetStore {
   addParentCategory(type: 'income' | 'expense', name: string): void {
     this.state.update((state) => {
       const newCategory: BudgetCategory = {
-        id: `parent-${Date.now()}`,
+        id: this.generateUniqueId(`parent-${type}-`),
         name: name,
         type,
         values: {},
         isParent: true,
       };
-
+      console.log('newCategory id parent==>', newCategory.id);
       return type === 'income'
         ? {
             ...state,
@@ -353,12 +392,14 @@ export class BudgetStore {
   addChildCategory(parentId: string, type: 'income' | 'expense'): void {
     this.state.update((state) => {
       const newCategory: BudgetCategory = {
-        id: Date.now().toString(),
+        id: this.generateUniqueId(`child-${type}-`),
         name: type === 'income' ? 'New Income Item' : 'New Expense Item',
         type,
         values: {},
         parentId: parentId,
       };
+
+      console.log('newCategory id child==>', newCategory.id);
 
       return type === 'income'
         ? {
