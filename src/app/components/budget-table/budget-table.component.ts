@@ -7,6 +7,7 @@ import { ContextMenuData } from '../../models/budget.model';
 import { DateRangeHeaderComponent } from '../../shared/ui/date-range-header/date-range-header.component';
 import { CustomBudgetTableComponent } from '../../shared/ui/custom-budget-table/custom-budget-table';
 import { CategoryEvent } from '../../typings/budget-typings';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-budget-table',
@@ -25,10 +26,7 @@ export class BudgetTableComponent {
 
   contextMenuData: ContextMenuData | null = null;
 
-  // @HostListener('document:click')
-  // onDocumentClick(): void {
-  //   this.contextMenuData = null;
-  // }
+  private router = inject(Router);
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
@@ -91,13 +89,6 @@ export class BudgetTableComponent {
     };
   }
 
-  // onApplyToAll(): void {
-  //   if (this.contextMenuData) {
-  //     const { categoryId, monthKey } = this.contextMenuData.cell;
-  //     this.budgetService.applyToAllMonths(categoryId, monthKey);
-  //   }
-  // }
-
   addCategory(type: 'income' | 'expense'): void {
     this.budgetService.addCategory(type);
   }
@@ -144,7 +135,11 @@ export class BudgetTableComponent {
     if (this.contextMenuData) {
       const { categoryId, monthKey } = this.contextMenuData.cell;
       this.budgetService.applyToAllMonths(categoryId, monthKey);
-      this.contextMenuData = null; 
+      this.contextMenuData = null;
     }
+  }
+
+  onTest(): void {
+    this.router.navigate(['/test']);
   }
 }

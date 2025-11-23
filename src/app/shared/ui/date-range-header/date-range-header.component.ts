@@ -2,12 +2,13 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DateRange } from '../../../models/date-range.model';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon'
+import { MatIconModule } from '@angular/material/icon';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-date-range-header',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, MatButtonModule, MatIconModule,  RouterModule],
   templateUrl: './date-range-header.component.html',
 })
 export class DateRangeHeaderComponent {
@@ -21,6 +22,7 @@ export class DateRangeHeaderComponent {
   @Output() export = new EventEmitter<void>();
   @Output() import = new EventEmitter<File>();
   @Output() clear = new EventEmitter<void>();
+  @Output() test = new EventEmitter<void>();
 
   onStartChange(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -47,5 +49,9 @@ export class DateRangeHeaderComponent {
 
   onClear(): void {
     this.clear.emit();
+  }
+
+  onTest(): void {
+    this.test.emit();
   }
 }
